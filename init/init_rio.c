@@ -34,23 +34,32 @@
 #include "log.h"
 #include "util.h"
 
-#include "init_msm.h"
+typedef struct {
+    const char *model;
+    const char *description;
+    const char *fingerprint;
+} match_t;
 
-void common_properties();
+static match_t matches[] = {
+    /* Huawei Gx8 USA L03 */
+    {
+        "RIO-L03",
+        "RIO-L03-user 5.0 GRJ90 C567B141 release-keys",
+        "HUAWEI/RIO-L03/HWRIO:5.1/HUAWEIRIO-L03/C567B141:user/release-keys"
+    },
+    { 0, 0, 0 }
+};
 
-void init_msm_properties(unsigned long msm_id, unsigned long msm_ver, char *board_type)
+void vendor_load_properties()
 {
     char platform[PROP_VALUE_MAX];
     char model[110];
     FILE* fp;
     int rc;
-
-    UNUSED(msm_id);
-    UNUSED(msm_ver);
-    UNUSED(board_type);
+    match_t *match;
 
     rc = property_get("ro.board.platform", platform);
-    if (!rc || !ISMATCH(platform, ANDROID_TARGET))
+    if (!rc || strncmp(platform, ANDROID_TARGET, PROP_VALUE_MAX))
         return;
 
     fp = fopen("/proc/app_info", "rb");
@@ -58,17 +67,14 @@ void init_msm_properties(unsigned long msm_id, unsigned long msm_ver, char *boar
         if (strstr(model, "huawei_fac_product_name") != NULL)
             break;
 
-    /* Huawei GX8 USA L03 */
-    if (strstr(model, "RIO-L03") != NULL) {
-        common_properties();
-        property_set("ro.build.product", "RIO-L03");
-        property_set("ro.build.description", "RIO-L03-user 5.0 GRJ90 C567B141 release-keys");
-        property_set("ro.build.fingerprint", "HUAWEI/RIO-L03/HWRIO:5.1/HUAWEIRIO-L03/C567B141:user/release-keys");
+    for (match = matches; match->model; match++) {
+        if (strstr(model, match->model)) {
+            property_set("ro.build.product", "rio");
+            property_set("ro.product.device", "rio");
+            property_set("ro.product.model", match->model);
+            property_set("ro.build.description", match->description);
+            property_set("ro.build.fingerprint", match->fingerprint);
+            break;
+        }
     }
-}
-
-void common_properties();
-{
-    property_set("ro.product.model", "MSM8916 for arm64");
-    property_set("ro.product.name", "msm8916_64");
 }
