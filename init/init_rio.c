@@ -61,6 +61,7 @@ void init_msm_properties(unsigned long msm_id, unsigned long msm_ver, char *boar
     /* Huawei GX8 USA L03 */
     if (strstr(model, "RIO-L03") != NULL) {
         common_properties();
+        property_set("ro.build.product", "RIO-L03");
         property_set("ro.build.description", "RIO-L03-user 5.0 GRJ90 C567B141 release-keys");
         property_set("ro.build.fingerprint", "HUAWEI/RIO-L03/HWRIO:5.1/HUAWEIRIO-L03/C567B141:user/release-keys");
     }
