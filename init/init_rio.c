@@ -69,7 +69,7 @@ void vendor_load_properties()
 
     for (match = matches; match->model; match++) {
         if (strstr(model, match->model)) {
-            property_set("ro.build.product", "rio");
+            property_set("ro.build.product", match->model);
             property_set("ro.product.device", "rio");
             property_set("ro.product.model", match->model);
             property_set("ro.build.description", match->description);
